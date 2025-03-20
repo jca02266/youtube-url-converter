@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube URL 変換ツール</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 400px;
+            background: white;
+            padding: 20px;
+            margin: 50px auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            background-color: #CC0000;
+            color: white;
+            padding: 15px;
+            font-size: 20px;
+            border-radius: 10px 10px 0 0;
+        }
+
+        h2 {
+            margin: 0;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .time-input {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .time-input div {
+            flex: 1;
+            min-width: 120px;
+            margin: 5px;
+        }
+
+        .time-input input {
+            width: 100%;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 15px;
+            background-color: #007BFF;
+            color: white;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #output {
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        #output a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+
+        #output a:hover {
+            text-decoration: underline;
+        }
+
+        /* スマホ対応（画面幅 400px 以下で時間入力を縦並びに） */
+        @media (max-width: 400px) {
+            .time-input {
+                flex-direction: column;
+            }
+
+            .time-input div {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h2>YouTube 時間指定URL変換ツール</h2>
+    <label for="youtubeUrl">YouTubeのURL:</label>
+    <input type="text" id="youtubeUrl" placeholder="https://www.youtube.com/watch?v=XXXXX">
+    <br>
+    <div class="time-input">
+        <div>
+            <label for="hours">開始時間（時）:</label>
+            <input type="number" id="hours" min="0" value="0">
+        </div>
+        <div>
+            <label for="minutes">分:</label>
+            <input type="number" id="minutes" min="0" value="0">
+        </div>
+        <div>
+            <label for="seconds">秒:</label>
+            <input type="number" id="seconds" min="0" max="59" value="0">
+        </div>
+    </div>
+    <br>
+    <button onclick="convertUrl()">変換してコピー</button>
+    <p id="output"></p>
+
+    <script>
+        function convertUrl() {
+            let url = document.getElementById("youtubeUrl").value;
+            let hours = parseInt(document.getElementById("hours").value, 10) || 0;
+            let minutes = parseInt(document.getElementById("minutes").value, 10) || 0;
+            let seconds = parseInt(document.getElementById("seconds").value, 10) || 0;
+            let template = ''
+            if (hours !== 0) {
+                template += `${hours}h`
+            }
+            if (minutes !== 0 || template.length > 0) {
+                template += `${minutes}m`
+            }
+            if (seconds !== 0 || template.length > 0) {
+                template += `${seconds}s`
+            }
+            let startTime = template;
+
+            // URLの解析
+            let videoIdMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube.com\/live\/)([a-zA-Z0-9_-]+)/);
+            if (!videoIdMatch) {
+                alert("有効なYouTubeのURLを入力してください");
+                return;
+            }
+
+            let videoId = videoIdMatch[1];
+            let newUrl = `https://www.youtube.com/watch?v=${videoId}&t=${startTime}`;
+
+            // クリップボードにコピー
+            navigator.clipboard.writeText(newUrl).then(() => {
+                document.getElementById("output").innerHTML = `コピーしました: <a href="${newUrl}" target="_blank">${newUrl}</a>`;
+            }).catch(err => {
+                alert("コピーに失敗しました: " + err);
+            });
+        }
+    </script>
+</body>
+
+</html>
