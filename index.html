@@ -35,13 +35,15 @@
             margin: 0;
         }
 
-        input {
-            width: 100%;
+        textarea {
+            width: calc(100% - 22px);
             padding: 10px;
-            margin: 10px 0;
+            margin: 10px 11px;
             border: 1px solid #ccc;
             border-radius: 5px;
             font-size: 16px;
+            resize: vertical;
+            box-sizing: border-box;
         }
 
         .time-input {
@@ -57,7 +59,12 @@
         }
 
         .time-input input {
-            width: 100%;
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin: 10px 11px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
         }
 
         button {
@@ -80,11 +87,15 @@
         #output {
             margin-top: 15px;
             font-size: 14px;
+            word-break: break-all;
+            text-align: left;
         }
 
         #output a {
             color: #007BFF;
             text-decoration: none;
+            display: block;
+            margin-bottom: 5px;
         }
 
         #output a:hover {
@@ -105,59 +116,86 @@
 </head>
 
 <body>
-    <h2>YouTube 時間指定URL変換ツール</h2>
-    <label for="youtubeUrl">YouTubeのURL:</label>
-    <input type="text" id="youtubeUrl" placeholder="https://www.youtube.com/watch?v=XXXXX">
-    <br>
-    <div class="time-input">
-        <div>
-            <label for="hours">開始時間（時）:</label>
-            <input type="number" id="hours" min="0" value="">
+    <div class="container">
+        <h2>YouTube 時間指定URL変換ツール</h2>
+        <label for="youtubeUrl">YouTubeのURL（複数行可）:</label>
+        <textarea id="youtubeUrl" rows="5" placeholder="https://www.youtube.com/watch?v=XXXXX"></textarea>
+        <br>
+        <div class="time-input">
+            <div>
+                <label for="hours">開始時間（時）:</label>
+                <input type="number" id="hours" min="0" value="">
+            </div>
+            <div>
+                <label for="minutes">分:</label>
+                <input type="number" id="minutes" min="0" value="">
+            </div>
+            <div>
+                <label for="seconds">秒:</label>
+                <input type="number" id="seconds" min="0" max="59" value="">
+            </div>
         </div>
-        <div>
-            <label for="minutes">分:</label>
-            <input type="number" id="minutes" min="0" value="">
-        </div>
-        <div>
-            <label for="seconds">秒:</label>
-            <input type="number" id="seconds" min="0" max="59" value="">
-        </div>
+        <br>
+        <button onclick="convertUrl()">変換してコピー</button>
+        <div id="output"></div>
     </div>
-    <br>
-    <button onclick="convertUrl()">変換してコピー</button>
-    <p id="output"></p>
 
     <script>
         function convertUrl() {
-            let url = document.getElementById("youtubeUrl").value;
-            let hours = parseInt(document.getElementById("hours").value, 10) || 0;
-            let minutes = parseInt(document.getElementById("minutes").value, 10) || 0;
-            let seconds = parseInt(document.getElementById("seconds").value, 10) || 0;
-            let template = ''
-            if (hours !== 0) {
-                template += `${hours}h`
-            }
-            if (minutes !== 0 || template.length > 0) {
-                template += `${minutes}m`
-            }
-            if (seconds !== 0 || template.length > 0) {
-                template += `${seconds}s`
-            }
-            let startTime = template;
+            let inputText = document.getElementById("youtubeUrl").value;
+            let lines = inputText.split(/\r?\n/).filter(line => line.trim() !== "");
+            
+            let hVal = document.getElementById("hours").value;
+            let mVal = document.getElementById("minutes").value;
+            let sVal = document.getElementById("seconds").value;
 
-            // URLの解析
-            let videoIdMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube.com\/live\/)([a-zA-Z0-9_-]+)/);
-            if (!videoIdMatch) {
+            let hours = parseInt(hVal, 10) || 0;
+            let minutes = parseInt(mVal, 10) || 0;
+            let seconds = parseInt(sVal, 10) || 0;
+
+            let hasTimeInput = (hVal !== "" || mVal !== "" || sVal !== "");
+            let startTime = "";
+
+            if (hasTimeInput) {
+                if (hours !== 0) startTime += `${hours}h`;
+                if (minutes !== 0) startTime += `${minutes}m`;
+                if (seconds !== 0) startTime += `${seconds}s`;
+            }
+
+            let convertedUrls = [];
+            let errorLines = [];
+
+            lines.forEach(line => {
+                let url = line.trim();
+                let videoIdMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube.com\/live\/)([a-zA-Z0-9_-]+)/);
+                if (videoIdMatch) {
+                    let videoId = videoIdMatch[1];
+                    let timeParam = (hasTimeInput && startTime !== "") ? `&t=${startTime}` : "";
+                    let newUrl = `https://www.youtube.com/watch?v=${videoId}${timeParam}`;
+                    convertedUrls.push(newUrl);
+                } else {
+                    errorLines.push(url);
+                }
+            });
+
+            if (convertedUrls.length === 0) {
                 alert("有効なYouTubeのURLを入力してください");
                 return;
             }
 
-            let videoId = videoIdMatch[1];
-            let newUrl = `https://www.youtube.com/watch?v=${videoId}&t=${startTime}`;
+            let clipboardText = convertedUrls.join("\n");
+            let outputHtml = "<h3>コピーしました:</h3>";
+            convertedUrls.forEach(u => {
+                outputHtml += `<a href="${u}" target="_blank">${u}</a>`;
+            });
+
+            if (errorLines.length > 0) {
+                outputHtml += "<p style='color: red; margin-top: 10px;'>※無視された行: " + errorLines.join(", ") + "</p>";
+            }
 
             // クリップボードにコピー
-            navigator.clipboard.writeText(newUrl).then(() => {
-                document.getElementById("output").innerHTML = `コピーしました: <a href="${newUrl}" target="_blank">${newUrl}</a>`;
+            navigator.clipboard.writeText(clipboardText).then(() => {
+                document.getElementById("output").innerHTML = outputHtml;
             }).catch(err => {
                 alert("コピーに失敗しました: " + err);
             });
