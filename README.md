@@ -1,20 +1,28 @@
-Netlifyサイトの作り方
-https://qiita.com/tommy_aka_jps/items/17a78cab2bdce3438746
+# YouTube 時間指定URL変換ツール
 
+YouTubeの各種URLを、時間指定（`&t=XXs`等）付きの標準URL形式（`https://www.youtube.com/watch?v=...`）に変換するツールです。
 
-1. Netlify にログイン
+## サイトURL
+[https://fanciful-queijadas-d2d4bf.netlify.app](https://fanciful-queijadas-d2d4bf.netlify.app)
 
-https://app.netlify.com/
+## 主な機能
+- **複数URLの一括変換**: テキストエリアに複数のYouTube URL（1行に1つ）を貼り付けて、一括で変換できます。
+- **柔軟な時間指定**: 開始時間（時・分・秒）を入力すると、すべてのURLにその時間を付与します。
+- **自動クリップボードコピー**: 変換ボタンを押すと、変換後のURLが自動的にクリップボードにコピーされます。
+- **インテリジェントなパラメータ制御**: 時間が入力されていない場合は、`&t=` パラメータを付与しません。
 
-2. Create a new site
+## 使い方
+1. YouTubeのURLを中央のテキストエリアに入力します（複数行可）。
+2. （任意）開始時間を時・分・秒のフィールドに入力します。
+3. 「変換してコピー」ボタンをクリックします。
+4. 変換後のURLが画面に表示され、クリップボードにもコピーされます。
 
-  deploy manually
+## デプロイ手順
+このプロジェクトはNetlifyの自動デプロイが設定されています。
 
-3. Drag & Drop
-
-#npx netlify login
-npx netlify init
-npx netlify dev
-
-npx netlify deploy
-npx netlify deploy --prod
+1. ローカルで変更を行い、gitでコミットします。
+2. GitHubリポジトリの `main` ブランチにプッシュします。
+   ```bash
+   git push origin main
+   ```
+3. GitHubへのプッシュを検知して、Netlify上で自動的にビルドとデプロイ（`index.html` のみの抽出）が実行されます。
