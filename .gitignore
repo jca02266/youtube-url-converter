@@ -1,2 +1,4 @@
 dist/
-x/
+
+# Local Netlify folder
+.netlify
