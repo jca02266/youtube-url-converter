@@ -51,21 +51,23 @@
             display: flex;
             justify-content: space-between;
             flex-wrap: wrap;
+            gap: 10px;
         }
 
         .time-input div {
             flex: 1;
-            min-width: 120px;
-            margin: 5px;
+            min-width: 100px;
+            margin: 0;
         }
 
         .time-input input {
-            width: calc(100% - 22px);
+            width: 100%;
             padding: 10px;
-            margin: 10px 11px;
+            margin: 10px 0;
             border: 1px solid #ccc;
             border-radius: 5px;
             font-size: 16px;
+            box-sizing: border-box;
         }
 
         button {
@@ -103,10 +105,11 @@
             text-decoration: underline;
         }
 
-        /* スマホ対応（画面幅 400px 以下で時間入力を縦並びに） */
-        @media (max-width: 400px) {
+        /* スマホ対応（画面幅 480px 以下で時間入力を縦並びに） */
+        @media (max-width: 480px) {
             .time-input {
                 flex-direction: column;
+                gap: 0;
             }
 
             .time-input div {
